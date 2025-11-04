@@ -1,0 +1,927 @@
+<!DOCTYPE html><html lang="es"><head id="Head1"><meta http-equiv="X-UA-Compatible" content="IE=9"><meta name="apple-mobile-web-app-capable" content="yes"><meta charset="utf-8"><title>
+	Principal
+</title>
+    <!-- Styles -->
+    <!-- El CSS predeterminado a cargar es el azul -HJ -->
+    <link type="text/css" rel="stylesheet" class="arguscorecss" href="css/bootstrap.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/bootstrap-responsive.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/bootstrap-overrides.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/Grid.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/GridVete.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/GridClinica.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/gridcobrar.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/gridagenda.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/ui-lightness/jquery-ui-1.8.21.custom.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/slate.css"><link type="text/css" rel="stylesheet" class="arguscorecss" href="css/slate-responsive.css"><link type="text/css" rel="stylesheet" href="css/dhtmlx.css">
+    <!-- Libreria que no debe tocarse -HJ -->
+    <link type="text/css" rel="stylesheet" href="css/select2.css">
+    <!-- Libreria que no debe tocarse -ASA -->
+
+    <!-- Javascript -->
+    <script src="js/jquery-1.7.2.min.js"></script>
+    
+    <script src="js/select2.js"></script>
+    <script src="js/jquery-ui-1.8.21.custom.min.js"></script>
+    <script src="js/jquery.ui.touch-punch.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    
+    <!--Necesario para el cambio de hacienda 4.3 - HJ-->
+    <style>
+        main {
+            margin-bottom: 200%;
+        }
+
+        .floating-menu {
+            font-family: sans-serif;
+            background: yellowgreen;
+            padding: 5px;
+            width: 130px;
+            z-index: 100;
+            position: fixed;
+        }
+
+            .floating-menu a,
+            .floating-menu h3 {
+                font-size: 0.9em;
+                display: block;
+                margin: 0 0.5em;
+                color: white;
+            }
+
+        /*Este es el estilo del mensaje de tab repetido -HJ */
+        .mensaje-repetido {
+            background-color: royalblue;
+            color: white;
+            display: inline-block;
+            padding: 16px;
+            top: 25%;
+            bottom: 25%;
+            left: 25%;
+            right: 25%;
+            position: fixed;
+            border-radius: 6px;
+            font-family: 'roboto';
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+
+    
+    
+
+    <script type="text/javascript">
+        function fetchCSS(uri) {
+            return new Promise((resolve, reject) => {
+                let HTTP = new XMLHttpRequest();
+                HTTP.open('POST', uri, true);
+                HTTP.setRequestHeader("content-type", "application/json");
+                HTTP.setRequestHeader("Accept", "application/json");
+
+                HTTP.onreadystatechange = function () {
+                    if (HTTP.readyState == 4) {
+                        if (HTTP.status == 200) {
+                            resolve(JSON.parse(HTTP.responseText).d);
+                        } else {
+                            reject(HTTP.statusText);
+                        }
+                    }
+                };
+
+                let data = JSON.stringify({ 'dummy': 'dummy' });
+                HTTP.send(data);
+            });
+        }
+
+        function ComenzarCambioCSS(IsF506) {
+            let todosCSS = document.getElementsByClassName("arguscorecss");
+
+            if (IsF506 === 'true') {
+                for (let contador = 0; contador < todosCSS.length; contador++) {
+                    todosCSS[contador].href = todosCSS[contador].href.replace("css/", "cssf506/");
+                }
+                let botoneradministra = document.getElementById("botoneraadministra");
+                if (botoneradministra) {
+                    botoneradministra.style.display = "none";
+                }
+                let botonera = document.getElementById("botonerafactura506");
+                if (botonera) {
+                    botonera.style.display = "block";
+                }
+            } else {
+                let botonera = document.getElementById("botoneraadministra");
+                if (botonera) {
+                    botonera.style.display = "block";
+                }
+            }
+        }
+
+        function ComenzarCambioCSSaptius(IsAptius) {
+            let todosCSS = document.getElementsByClassName("arguscorecss");
+
+            if (IsAptius === 'true') {
+                for (let contador = 0; contador < todosCSS.length; contador++) {
+                    todosCSS[contador].href = todosCSS[contador].href.replace("css/", "cssaptius/");
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            fetchCSS("./Handlers.aspx/CargarCSS_SistemaAptius")
+                .then(IsAptius => {
+                    ComenzarCambioCSSaptius(IsAptius);
+                    return fetchCSS("./Handlers.aspx/CargarCSS_Sistema");
+                })
+                .then(IsF506 => {
+                    ComenzarCambioCSS(IsF506);
+                })
+                .catch(error => {
+                    console.error("Error al cargar CSS:", error);
+                });
+
+            //Otras funciones opcionales se pueden llamar aquí si es necesario
+            // IsDebeBloquearTabs();
+        });
+
+        var triangulazoAmarillo = 'https://icons.iconarchive.com/icons/google/noto-emoji-symbols/48/73028-warning-icon.png';
+
+        function limpiarTabs() {
+            localStorage.clear();
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        function verificarTabsRepetidos() {
+            if (!sessionStorage.getItem("tabID")) {
+                sessionStorage.setItem("tabID", new Date().toISOString());
+            }
+
+            if (localStorage.getItem("tabsRepetidos") && localStorage.getItem("tabsRepetidos") !== sessionStorage.getItem("tabID")) {
+                document.body.innerHTML =
+                    '<div class="mensaje-repetido">' +
+                    '<img src="' + triangulazoAmarillo + '" alt="Advertencia"><br> <br>' +
+                    '<b>El Tab que acaba de abrir está repetido<br>' +
+                    'Por favor cierre este tab y utilice el abierto previamente.</b><br><br>' +
+                    'si no hay más tabs abiertos haga click en Limpiar Tabs:<br> <br>' +
+                    '<button onclick="javascript:limpiarTabs();">Limpiar Tabs</button>' +
+                    '<div>';
+            } else {
+                localStorage.setItem("tabsRepetidos", sessionStorage.getItem("tabID"));
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        function killBackSpace(e) {
+            e = e ? e : window.event;
+            var t = e.target ? e.target : e.srcElement ? e.srcElement : null;
+            if (t && t.tagName && (t.type && /(password)|(text)|(file)/.test(t.type.toLowerCase())) || t.tagName.toLowerCase() == 'textarea')
+                return true;
+            var k = e.keyCode ? e.keyCode : e.which ? e.which : null;
+            if (k == 8) {
+                if (e.preventDefault)
+                    e.preventDefault();
+                return false;
+            };
+            return true;
+        };
+
+        if (typeof document.addEventListener != 'undefined')
+            document.addEventListener('keydown', killBackSpace, false);
+        else if (typeof document.attachEvent != 'undefined')
+            document.attachEvent('onkeydown', killBackSpace);
+        else {
+            if (document.onkeydown != null) {
+                var oldOnkeydown = document.onkeydown;
+                document.onkeydown = function (e) {
+                    oldOnkeydown(e);
+                    killBackSpace(e);
+                };
+            }
+
+            else
+                document.onkeydown = killBackSpace;
+        }
+    </script>
+</head>
+<body>
+    <form method="post" action="./estadocuentanebbia.aspx" id="form1" enctype="multipart/form-data">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" style="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" style="">
+<input type="hidden" name="MainContent_FileUpload_ClientState" id="MainContent_FileUpload_ClientState" value="" style="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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DxYCHwIFBTIyLjYwZGQCBQ8PFgIfAgUMVS5TLiBEb2xsYXJzZGQCBg8PFgIfAgUFMjIuNjBkZAIHDw8WAh8CBQkxMSw0MDYuOTBkZAIIDw8WAh8CBRBPUlRPTUVESUNBICBNWVQgZGQCCQ8PFgIfAgUNMy0xMDEtNzI2OTg4IGRkAgIPDxYCHwNoZGQCEw9kFgICAQ9kFgJmDxYEHgJpZAUiY3RsMDBfTWFpbkNvbnRlbnRfRmlsZVVwbG9hZF9jdGwwMh4Fc3R5bGUFDHdpZHRoOjIyMHB4O2QYAgUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgQFGmN0bDAwJGltZ19jYW1iaWFyX3Bhc3N3b3JkBSBjdGwwMCRNYWluQ29udGVudCRpbWdfYnRuX2luaWNpbwUzY3RsMDAkTWFpbkNvbnRlbnQkZ3JpZF9kYXRvcyRjdGwwMiRjaGtfc2VsZWNjaW9uYWRvBRxjdGwwMCRNYWluQ29udGVudCRGaWxlVXBsb2FkBRxjdGwwMCRNYWluQ29udGVudCRncmlkX2RhdG9zDzwrAAwBCAIBZKT371f9I0HBrWAtX8Ti0dp+qKBUjya/VLS5aU6bX2VC" style="">
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form1'];
+if (!theForm) {
+    theForm = document.form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=2ndeSNIkga-CT5nL9mTfDFCQFa1MJ35zd8snFzHszuA4IFRLB7EmO2scQ_ud1qdJxYg0l09WPBGU6kgTJL2skrUuZkdMnTqZAm1WQ1yTQ2k1&amp;t=638568388371266408" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+//<![CDATA[
+var __cultureInfo = {"name":"es-MX","numberFormat":{"CurrencyDecimalDigits":2,"CurrencyDecimalSeparator":".","IsReadOnly":true,"CurrencyGroupSizes":[3],"NumberGroupSizes":[3],"PercentGroupSizes":[3],"CurrencyGroupSeparator":",","CurrencySymbol":"$","NaNSymbol":"NaN","CurrencyNegativePattern":1,"NumberNegativePattern":1,"PercentPositivePattern":0,"PercentNegativePattern":0,"NegativeInfinitySymbol":"-∞","NegativeSign":"-","NumberDecimalDigits":2,"NumberDecimalSeparator":".","NumberGroupSeparator":",","CurrencyPositivePattern":0,"PositiveInfinitySymbol":"∞","PositiveSign":"+","PercentDecimalDigits":2,"PercentDecimalSeparator":".","PercentGroupSeparator":",","PercentSymbol":"%","PerMilleSymbol":"‰","NativeDigits":["0","1","2","3","4","5","6","7","8","9"],"DigitSubstitution":1},"dateTimeFormat":{"AMDesignator":"a. m.","Calendar":{"MinSupportedDateTime":"\/Date(-62135575200000)\/","MaxSupportedDateTime":"\/Date(253402300799999)\/","AlgorithmType":1,"CalendarType":1,"Eras":[1],"TwoDigitYearMax":2029,"IsReadOnly":true},"DateSeparator":"/","FirstDayOfWeek":0,"CalendarWeekRule":0,"FullDateTimePattern":"dddd, d\u0027 de \u0027MMMM\u0027 de \u0027yyyy hh:mm:ss tt","LongDatePattern":"dddd, d\u0027 de \u0027MMMM\u0027 de \u0027yyyy","LongTimePattern":"hh:mm:ss tt","MonthDayPattern":"d \u0027de\u0027 MMMM","PMDesignator":"p. m.","RFC1123Pattern":"ddd, dd MMM yyyy HH\u0027:\u0027mm\u0027:\u0027ss \u0027GMT\u0027","ShortDatePattern":"dd/MM/yyyy","ShortTimePattern":"hh:mm tt","SortableDateTimePattern":"yyyy\u0027-\u0027MM\u0027-\u0027dd\u0027T\u0027HH\u0027:\u0027mm\u0027:\u0027ss","TimeSeparator":":","UniversalSortableDateTimePattern":"yyyy\u0027-\u0027MM\u0027-\u0027dd HH\u0027:\u0027mm\u0027:\u0027ss\u0027Z\u0027","YearMonthPattern":"MMMM\u0027 de \u0027yyyy","AbbreviatedDayNames":["dom.","lun.","mar.","mié.","jue.","vie.","sáb."],"ShortestDayNames":["do.","lu.","ma.","mi.","ju.","vi.","sá."],"DayNames":["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],"AbbreviatedMonthNames":["ene.","feb.","mar.","abr.","may.","jun.","jul.","ago.","sep.","oct.","nov.","dic.",""],"MonthNames":["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre",""],"IsReadOnly":true,"NativeCalendarName":"calendario gregoriano","AbbreviatedMonthGenitiveNames":["ene.","feb.","mar.","abr.","may.","jun.","jul.","ago.","sep.","oct.","nov.","dic.",""],"MonthGenitiveNames":["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre",""]},"eras":[1,"d. C.",null,0]};//]]>
+</script>
+
+<script src="/ScriptResource.axd?d=NlXhyeLFpfKke6ulCqiGlSaNDFTuE2OwUCwV7ihuJFjWkb8D43ep1DTTZTlCuVFRHuk4i30LJ2HOVuLoWL-emr_t_BshlZw4I-0q2otJdRC2mZkkJsls2jHbMzxDsenu0&amp;t=7c776dc1" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=V-DUzHvZ8QXtf50sE7lMSAMM2pvMBHOpET1WEFKeNL08rwTwSo4fiMJhAkgL7paQMSSSWwPzMrzHc_JpW0_uvXxgz-NRpdDZbwL_J5j4Sb99plXxyb7lvHGi4I7Uon-Xj4F90uFf1DdRhWbXYaKJNw2&amp;t=7c776dc1" type="text/javascript"></script>
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="BCDB30F1" style="">
+	<input type="hidden" name="__SCROLLPOSITIONX" id="__SCROLLPOSITIONX" value="0" style="">
+	<input type="hidden" name="__SCROLLPOSITIONY" id="__SCROLLPOSITIONY" value="0" style="">
+</div>
+        <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ScriptManager1', 'form1', [], [], [], 14400, 'ctl00');
+//]]>
+</script>
+
+        <div id="header">
+            <div class="container">
+                <a href="default.aspx">
+                    <img src="https://sistema.grupoargus.co.cr/LogosClientes/COM_ORTOMEDICA_Logo-Original-para-rótulo.png" id="imagen" style="margin-left: 15px;" alt="Grupo Argus" height="85"></a>
+                <div id="info">
+                    <a id="lbtnCerrar" href="javascript:__doPostBack('ctl00$lbtnCerrar','')">[Cerrar Sesión]</a>
+                    <br>
+                    <h4>Bienvenido(a),
+                    <span id="lbl_usuario">mpadillasj</span>
+                        <input type="image" name="ctl00$img_cambiar_password" id="img_cambiar_password" title="Cambiar Password" src="img/key-icon.png" style="border-width: 0px; height: 22px; width: 22px;">
+                    </h4>
+                        <a id="lnk_tipocambio" href="javascript:__doPostBack('ctl00$lnk_tipocambio','')">TC Dólar:Venta 504.73 Compra 498.37</a>
+                    <br>
+                    <h5>
+                        &nbsp;</h5>
+                </div>
+                <div id="info2">
+                    <h4>
+                        <a id="link" target="_blank">
+                            </a>
+                    </h4>
+                </div>
+            </div>
+            <!-- /#info-menu -->
+        </div>
+        <!-- /#info -->
+        <div id="nav">
+            <div class="container">
+                <a href="" class="btn-navbar" data-toggle="collapse" data-target="nav-collapse"><i class="icon-reorder"></i></a>
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        <li class="nav-icon"><a href="default.aspx"><i class="icon-home"></i><span>Inicio</span>
+                        </a></li>
+                        <li class="dropdown"><a id="administracion" class="dropdown-toggle" data-toggle="dropdown">Administración</a>
+                            <ul class="dropdown-menu">
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li><a id="restringirhorario" href="javascript:__doPostBack('ctl00$restringirhorario','')">Restringir horario de uso del sistema</a></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li><a id="mantenimiento_precio_servicio" href="javascript:__doPostBack('ctl00$mantenimiento_precio_servicio','')">Precios de Servicios</a></li>
+                                <li><a id="mantenimiento_precio_egreso" href="javascript:__doPostBack('ctl00$mantenimiento_precio_egreso','')">Precios de Egresos</a></li>
+                                <li><a id="mantenimiento_usuarios" href="javascript:__doPostBack('ctl00$mantenimiento_usuarios','')">Usuarios</a></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li><a id="mantenimiento_reportes_grupo_usuario" href="javascript:__doPostBack('ctl00$mantenimiento_reportes_grupo_usuario','')">Reportes Dinámicos por
+                                Grupo de Usuario</a></li>
+                                <li></li>
+                                <li><a id="mantenimiento_grupos_usuario_reporte" href="javascript:__doPostBack('ctl00$mantenimiento_grupos_usuario_reporte','')">Grupos de Usuario
+                                por Reporte</a></li>
+                                <li></li>
+                                <li><a id="unificar_pacientes" href="javascript:__doPostBack('ctl00$unificar_pacientes','')">Unificar Pacientes</a></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+
+                                <li></li>
+                                <li></li>
+                                <li><a id="configuracion_contrasenas" href="javascript:__doPostBack('ctl00$configuracion_contrasenas','')">Configuración de Contraseñas</a></li>
+                                <li><a id="cambiar_basedatos_usuario" href="javascript:__doPostBack('ctl00$cambiar_basedatos_usuario','')">Cambiar de Base de Datos del Usuario</a></li>
+                                <li><a id="contrasenas_descuentos" href="javascript:__doPostBack('ctl00$contrasenas_descuentos','')">Contraseñas para Descuentos</a></li>
+                                <li><a id="configuralogo" href="javascript:__doPostBack('ctl00$configuralogo','')">Configurar Logo</a></li>
+                                <li class="dropdown"><a id="administracion_migracion" class="dropdown-toggle" data-toggle="dropdown"><i></i>Importación de Datos<b class="icon-chevron-right sub-menu-caret"></b></a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="administracion_migracion_clientes" href="javascript:__doPostBack('ctl00$administracion_migracion_clientes','')">Clientes</a></li>
+                                        <li><a id="administracion_migracion_inventarios" href="javascript:__doPostBack('ctl00$administracion_migracion_inventarios','')">Inventarios</a></li>
+                                        <li><a id="administracion_migracion_servicios" href="javascript:__doPostBack('ctl00$administracion_migracion_servicios','')">Servicios</a></li>
+                                        <li><a id="administracion_migracion_motivocita" href="javascript:__doPostBack('ctl00$administracion_migracion_motivocita','')">Motivos de Cita</a></li>
+                                        <li><a id="administracion_migracion_proveedores" href="javascript:__doPostBack('ctl00$administracion_migracion_proveedores','')">Proveedores</a></li>
+                                        <li><a id="administracion_migracion_motivosconsulta" href="javascript:__doPostBack('ctl00$administracion_migracion_motivosconsulta','')">Motivos de Consulta</a></li>
+                                        <li><a id="administracion_ActualizarDatosCompra" href="javascript:__doPostBack('ctl00$administracion_ActualizarDatosCompra','')">Datos Módulo de Compras</a></li>
+                                        <li><a id="administracion_ActualizarDatosFarmaceuticos" href="javascript:__doPostBack('ctl00$administracion_ActualizarDatosFarmaceuticos','')">Datos Farmacéuticos</a></li>
+                                        <li><a id="administracion_ActualizarPreciosServicios" href="javascript:__doPostBack('ctl00$administracion_ActualizarPreciosServicios','')">Actualizar Precios de Servicios</a></li>
+                                        <li><a id="administracion_ImportarLotes" href="javascript:__doPostBack('ctl00$administracion_ImportarLotes','')">Importar Lotes</a></li>
+
+                                        <li><a id="descargarplantillas" href="javascript:__doPostBack('ctl00$descargarplantillas','')">Descargar Plantillas</a></li>
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                <li></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <ul class="dropdown-menu">
+                                <li><a id="mantenimiento_servicios506" href="javascript:__doPostBack('ctl00$mantenimiento_servicios506','')">Servicios</a></li>
+                                <li><a id="mantenimiento_insumos506" href="javascript:__doPostBack('ctl00$mantenimiento_insumos506','')">Productos</a></li>
+                                <li><a id="mantenimiento_clinicas506" href="javascript:__doPostBack('ctl00$mantenimiento_clinicas506','')">Clínicas</a></li>
+                                <li><a id="actividadeconomicacompania506" href="javascript:__doPostBack('ctl00$actividadeconomicacompania506','')">Actividades Económicas por Compañía</a></li>
+                                <li><a id="configuracion_companiarecepcion506" href="javascript:__doPostBack('ctl00$configuracion_companiarecepcion506','')">Configuración Recepción Automática Documentos Electrónicos</a></li>
+                                <li><a id="mantenimiento_proveedores506" href="javascript:__doPostBack('ctl00$mantenimiento_proveedores506','')">Proveedores</a></li>
+                                <li><a id="mantenimiento_egresos506" href="javascript:__doPostBack('ctl00$mantenimiento_egresos506','')">Egresos</a></li>
+                                <li class="dropdown"><a href="#" id="ddl_transacciones506">Transacciones<i class="icon-chevron-right sub-menu-caret"> </i></a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_naturalezadescuentos506" href="javascript:__doPostBack('ctl00$mantenimiento_naturalezadescuentos506','')">Naturaleza de
+                                        Descuentos</a></li>
+                                        <li><a id="mantenimiento_monedas506" href="javascript:__doPostBack('ctl00$mantenimiento_monedas506','')">Monedas</a></li>
+                                        <li><a id="mantenimiento_tarjetas506" href="javascript:__doPostBack('ctl00$mantenimiento_tarjetas506','')">Tarjetas</a></li>
+                                        <li><a id="mantenimiento_comisionestarjetas506" href="javascript:__doPostBack('ctl00$mantenimiento_comisionestarjetas506','')">Comisiones de Tarjetas</a></li>
+                                        <li><a id="mantenimiento_bancos506" href="javascript:__doPostBack('ctl00$mantenimiento_bancos506','')">Bancos</a></li>
+                                        <li><a id="mantenimiento_denominaciones506" href="javascript:__doPostBack('ctl00$mantenimiento_denominaciones506','')">Denominaciones</a></li>
+                                        <li><a id="mantenimiento_tiposdePago506" href="javascript:__doPostBack('ctl00$mantenimiento_tiposdePago506','')">Tipos de Pago</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="menu_reportes506">Reportes<i class="icon-chevron-right sub-menu-caret">
+                                </i></a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_consultas506" href="javascript:__doPostBack('ctl00$mantenimiento_consultas506','')">Reportes Dinámicos</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                <li><a id="mantenimiento_fechavence_llavescriptograficas506" href="javascript:__doPostBack('ctl00$mantenimiento_fechavence_llavescriptograficas506','')">Importación de Llaves Criptográficas</a></li>
+                            </ul>
+
+                        </li>
+                        <li class="dropdown"><a id="mantenimientos" class="dropdown-toggle" data-toggle="dropdown">Mantenimientos</a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown"><a href="#" id="ddl_servicios">Servicios &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_servicios" href="javascript:__doPostBack('ctl00$mantenimiento_servicios','')">Servicios</a></li>
+                                        <li><a id="mantenimiento_catalogo_servicios" href="javascript:__doPostBack('ctl00$mantenimiento_catalogo_servicios','')">Catálogo de Servicios</a></li>
+                                        <li><a id="mantenimiento_clasificacion_servicios" href="javascript:__doPostBack('ctl00$mantenimiento_clasificacion_servicios','')">Clasificación
+                                        de Servicios</a></li>
+                                        <li><a id="mantenimiento_subclasificacion_servicios" href="javascript:__doPostBack('ctl00$mantenimiento_subclasificacion_servicios','')">Sub Clasificación
+                                        de Servicios</a></li>
+                                        <li><a id="mantenimiento_clinicas_catalogo" href="javascript:__doPostBack('ctl00$mantenimiento_clinicas_catalogo','')">Clínicas por Catálogo</a></li>
+                                        <li><a id="mantenimiento_catalogos_clinica" href="javascript:__doPostBack('ctl00$mantenimiento_catalogos_clinica','')">Catálogos por Clínica</a></li>
+                                        <li><a id="mantenimiento_composicion_servicio" href="javascript:__doPostBack('ctl00$mantenimiento_composicion_servicio','')">Composición de
+                                        Servicios</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="ddl_egresos">Egresos &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_egresos" href="javascript:__doPostBack('ctl00$mantenimiento_egresos','')">Egresos</a></li>
+                                        <li><a id="mantenimiento_catalogo_egresos" href="javascript:__doPostBack('ctl00$mantenimiento_catalogo_egresos','')">Catálogo de Egresos</a></li>
+                                        <li><a id="mantenimiento_clasificacion_egresos" href="javascript:__doPostBack('ctl00$mantenimiento_clasificacion_egresos','')">Clasificación
+                                        de Egresos</a></li>
+                                        <li><a id="mantenimiento_subclasificacion_egresos" href="javascript:__doPostBack('ctl00$mantenimiento_subclasificacion_egresos','')">Sub Clasificación
+                                        de Egresos</a></li>
+                                        <li><a id="mantenimiento_clinicas_catalogo_egresos" href="javascript:__doPostBack('ctl00$mantenimiento_clinicas_catalogo_egresos','')">Clínicas
+                                        por Catálogo de Egresos</a></li>
+                                        <li><a id="mantenimiento_catalogos_clinica_egresos" href="javascript:__doPostBack('ctl00$mantenimiento_catalogos_clinica_egresos','')">Catálogos
+                                        de Egresos por Clínica</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a id="ddl_pacientes">Pacientes &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_tipos_referencias" href="javascript:__doPostBack('ctl00$mantenimiento_tipos_referencias','')">Tipos de Referencia</a></li>
+                                        <li><a id="mantenimiento_detalle_referencia" href="javascript:__doPostBack('ctl00$mantenimiento_detalle_referencia','')">Detalle de Referencia</a></li>
+                                        <li><a id="mantenimiento_profesiones" href="javascript:__doPostBack('ctl00$mantenimiento_profesiones','')">Profesiones</a></li>
+                                        <li><a id="mantenimiento_paises" href="javascript:__doPostBack('ctl00$mantenimiento_paises','')">Países</a></li>
+                                        <li><a id="mantenimiento_cargo" href="javascript:__doPostBack('ctl00$mantenimiento_cargo','')">Parentesco</a></li>
+                                        <li><a id="mantenimiento_tipos_plantillas" href="javascript:__doPostBack('ctl00$mantenimiento_tipos_plantillas','')">Tipos de Plantillas</a></li>
+                                        <li><a id="mantenimiento_plantillas" href="javascript:__doPostBack('ctl00$mantenimiento_plantillas','')">Plantillas</a></li>
+                                        <li><a id="cargar_imagen_para_plantillas" href="javascript:__doPostBack('ctl00$cargar_imagen_para_plantillas','')">Cargar Imagen para Plantillas</a></li>
+                                        <li><a id="mantenimiento_tipos_archivos" href="javascript:__doPostBack('ctl00$mantenimiento_tipos_archivos','')">Tipos de Archivo</a></li>
+                                        <li></li>
+                                        <li class="dropdown"><a id="SeguimientoPrincipal">Seguimiento &gt;</a>
+                                            <ul class="dropdown-menu sub-menu">
+                                                <li><a id="mantenimiento_estado_cliente" href="javascript:__doPostBack('ctl00$mantenimiento_estado_cliente','')">Estados de Cliente</a></li>
+                                                <li><a id="mantenimiento_tipo_actividad" href="javascript:__doPostBack('ctl00$mantenimiento_tipo_actividad','')">Tipos de Actividad</a></li>
+                                                <li><a id="mantenimiento_estado_actividad" href="javascript:__doPostBack('ctl00$mantenimiento_estado_actividad','')">Estados de Actividad</a></li>
+                                                <li><a id="mantenimiento_resultado_actividad" href="javascript:__doPostBack('ctl00$mantenimiento_resultado_actividad','')">Resultados de Actividad</a></li>
+                                                <li><a id="mantenimiento_tipo_nota" href="javascript:__doPostBack('ctl00$mantenimiento_tipo_nota','')">Tipos de Notas</a></li>
+                                                <li><a id="mantenimiento_estado_nota" href="javascript:__doPostBack('ctl00$mantenimiento_estado_nota','')">Estado de Notas</a></li>
+                                                <li><a id="mantenimiento_notas_predeterminadas" href="javascript:__doPostBack('ctl00$mantenimiento_notas_predeterminadas','')">Notas Predeterminadas</a></li>
+                                                <li></li>
+                                                <li></li>
+                                                <li></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="ddl_clinicas">Clínicas &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_clinicas" href="javascript:__doPostBack('ctl00$mantenimiento_clinicas','')">Clínicas</a></li>
+                                        <li><a id="actividadeconomicacompania" href="javascript:__doPostBack('ctl00$actividadeconomicacompania','')">Actividades Económicas por Compañía</a></li>
+                                        <li><a id="configuracion_companiarecepcion" href="javascript:__doPostBack('ctl00$configuracion_companiarecepcion','')">Configuración Recepción Automática Documentos Electrónicos</a></li>
+                                        <li><a id="mantenimiento_doctores" href="javascript:__doPostBack('ctl00$mantenimiento_doctores','')">Doctores</a></li>
+                                        <li><a id="mantenimiento_clinicas_doctor" href="javascript:__doPostBack('ctl00$mantenimiento_clinicas_doctor','')">Clínicas por Doctor</a></li>
+                                        <li><a id="mantenimiento_doctores_clinica" href="javascript:__doPostBack('ctl00$mantenimiento_doctores_clinica','')">Doctores por Clínica</a></li>
+                                        <li><a id="mantenimiento_fechavence_llavescriptograficas" href="javascript:__doPostBack('ctl00$mantenimiento_fechavence_llavescriptograficas','')">Importación de Llaves Criptográficas</a></li>
+                                        <li><a id="mantenimiento_especialidades" href="javascript:__doPostBack('ctl00$mantenimiento_especialidades','')">Especialidades</a></li>
+                                        <li><a id="mantenimiento_clinicas_especialidad" href="javascript:__doPostBack('ctl00$mantenimiento_clinicas_especialidad','')">Clínicas por
+                                        Especialidad</a></li>
+                                        <li><a id="mantenimiento_especialidades_clinica" href="javascript:__doPostBack('ctl00$mantenimiento_especialidades_clinica','')">Especialidades
+                                        por Clínica</a></li>
+                                        <li><a id="mantenimiento_bodegas_compania" href="javascript:__doPostBack('ctl00$mantenimiento_bodegas_compania','')">Bodegas por Compañía</a></li>
+                                        <li><a id="mantenimiento_sumarioanamnesis" href="javascript:__doPostBack('ctl00$mantenimiento_sumarioanamnesis','')">Sumario de Anamnesis</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="mantenimiento_motivos_consulta" href="javascript:__doPostBack('ctl00$mantenimiento_motivos_consulta','')">Motivos de Consulta</a></li>
+                                        <li><a id="mantenimiento_tipos_consulta" href="javascript:__doPostBack('ctl00$mantenimiento_tipos_consulta','')">Tipos de Consulta</a></li>
+                                        <li><a id="mantenimiento_diagnostico" href="javascript:__doPostBack('ctl00$mantenimiento_diagnostico','')">Diagnósticos</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="mantenimiento_procedimientos" href="javascript:__doPostBack('ctl00$mantenimiento_procedimientos','')">Procedimientos</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="ddl_Agenda">Agenda<i class="icon-chevron-right sub-menu-caret">
+                                </i></a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_ubicaciones" href="javascript:__doPostBack('ctl00$mantenimiento_ubicaciones','')">Consultorios</a></li>
+                                        <li><a id="mantenimiento_motivos_cita" href="javascript:__doPostBack('ctl00$mantenimiento_motivos_cita','')">Motivos de Cita</a></li>
+                                        <li><a id="mantenimiento_estados_cita" href="javascript:__doPostBack('ctl00$mantenimiento_estados_cita','')">Estados de Cita</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="mantenimiento_cuestionario_calificacioncita" href="javascript:__doPostBack('ctl00$mantenimiento_cuestionario_calificacioncita','')">Cuestionario de Calificación de Citas</a></li>
+                                        <li><a id="mantenimiento_respuestascuestionario_calificacioncita" href="javascript:__doPostBack('ctl00$mantenimiento_respuestascuestionario_calificacioncita','')">Respuestas de Cuestionario de Calificación de Citas</a></li>
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                
+                                <li class="dropdown"><a id="Seguros">Seguros &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_aseguradora" href="javascript:__doPostBack('ctl00$mantenimiento_aseguradora','')">Aseguradoras</a></li>
+                                        <li><a id="mantenimiento_tipopoliza" href="javascript:__doPostBack('ctl00$mantenimiento_tipopoliza','')">Tipos de Póliza</a></li>
+                                    </ul>
+                                </li>
+                                <li id="recetas" class="dropdown"><a href="#" id="ddl_recetas">Recetas &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_medicamentos" href="javascript:__doPostBack('ctl00$mantenimiento_medicamentos','')">Medicamentos</a></li>
+                                        <li><a id="mantenimiento_dosis" href="javascript:__doPostBack('ctl00$mantenimiento_dosis','')">Dosis</a></li>
+                                        <li><a id="mantenimiento_frecuencias" href="javascript:__doPostBack('ctl00$mantenimiento_frecuencias','')">Frecuencias</a></li>
+                                        <li><a id="mantenimiento_tiempo" href="javascript:__doPostBack('ctl00$mantenimiento_tiempo','')">Tiempo</a></li>
+                                        <li><a id="mantenimiento_viasaplicacion" href="javascript:__doPostBack('ctl00$mantenimiento_viasaplicacion','')">Vías de Aplicación</a></li>
+                                    </ul>
+                                </li>
+                                <li id="traslados" class="dropdown"><a href="#" id="ddl_traslados">Traslados &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_destinotraslado" href="javascript:__doPostBack('ctl00$mantenimiento_destinotraslado','')">Destino</a></li>
+                                        <li><a id="mantenimiento_mediotraslado" href="javascript:__doPostBack('ctl00$mantenimiento_mediotraslado','')">Medio</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="ddl_transacciones">Transacciones &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a href="mantenimientotipofactura.aspx" id="manteninimientotiposfactura">Tipos de Factura</a></li>
+                                        <li><a id="mantenimiento_naturalezadescuentos" href="javascript:__doPostBack('ctl00$mantenimiento_naturalezadescuentos','')">Naturaleza de
+                                        Descuentos</a></li>
+                                        <li><a id="mantenimiento_monedas" href="javascript:__doPostBack('ctl00$mantenimiento_monedas','')">Monedas</a></li>
+                                        <li><a id="mantenimiento_tarjetas" href="javascript:__doPostBack('ctl00$mantenimiento_tarjetas','')">Tarjetas</a></li>
+                                        <li><a id="mantenimiento_comisionestarjetas" href="javascript:__doPostBack('ctl00$mantenimiento_comisionestarjetas','')">Comisiones de Tarjetas</a></li>
+                                        <li><a id="mantenimiento_bancos" href="javascript:__doPostBack('ctl00$mantenimiento_bancos','')">Bancos</a></li>
+                                        <li><a id="mantenimiento_cuentasbancarias" href="javascript:__doPostBack('ctl00$mantenimiento_cuentasbancarias','')">Cuentas Bancarias</a></li>
+                                        <li><a id="mantenimiento_descuentos" href="javascript:__doPostBack('ctl00$mantenimiento_descuentos','')">Descuentos</a></li>
+                                        <li><a id="mantenimiento_denominaciones" href="javascript:__doPostBack('ctl00$mantenimiento_denominaciones','')">Denominaciones</a></li>
+                                        <li><a id="mantenimiento_tiposdePago" href="javascript:__doPostBack('ctl00$mantenimiento_tiposdePago','')">Tipos de Pago</a></li>
+                                        <li><a id="mantenimiento_tiposdePagorecibosadelanto" href="javascript:__doPostBack('ctl00$mantenimiento_tiposdePagorecibosadelanto','')">Tipos de
+                                        Pago para Recibos de Adelanto</a></li>
+                                        <li><a id="mantenimiento_clasificacionpresupuestos" href="javascript:__doPostBack('ctl00$mantenimiento_clasificacionpresupuestos','')">Clasificación
+                                        de Presupuestos</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li class="dropdown"><a id="menu_otroscargos">Otros Cargos &gt;</a>
+                                            <ul class="dropdown-menu sub-menu">
+                                                <li><a id="mantenimiento_terceros" href="javascript:__doPostBack('ctl00$mantenimiento_terceros','')">Terceros</a></li>
+                                                <li><a id="mantenimiento_otroscargos" href="javascript:__doPostBack('ctl00$mantenimiento_otroscargos','')">Otros Cargos</a></li>
+                                                <li><a id="mantenimiento_otroscargosinsumo" href="javascript:__doPostBack('ctl00$mantenimiento_otroscargosinsumo','')">Otros Cargos - Insumos</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="ddl_inventarios">Inventarios &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_bodega" href="javascript:__doPostBack('ctl00$mantenimiento_bodega','')">Bodegas</a></li>
+                                        <li><a id="mantenimiento_insumos_por_servicio" href="javascript:__doPostBack('ctl00$mantenimiento_insumos_por_servicio','')">Insumos por Servicio</a></li>
+                                        <li><a id="mantenimiento_insumos_por_insumo" href="javascript:__doPostBack('ctl00$mantenimiento_insumos_por_insumo','')">Insumos por Insumo
+                                        (Insumos Compuestos)</a></li>
+                                        <li><a id="mantenimiento_clasificacioninsumos" href="javascript:__doPostBack('ctl00$mantenimiento_clasificacioninsumos','')">Clasificación
+                                        de Insumos</a></li>
+                                        <li><a id="mantenimiento_unidadesmedida" href="javascript:__doPostBack('ctl00$mantenimiento_unidadesmedida','')">Unidades de Medida</a></li>
+                                        <li><a id="mantenimiento_familias" href="javascript:__doPostBack('ctl00$mantenimiento_familias','')">Familias</a></li>
+                                        <li><a id="mantenimiento_subfamilias" href="javascript:__doPostBack('ctl00$mantenimiento_subfamilias','')">Sub Familias</a></li>
+                                        <li><a id="mantenimiento_gamas" href="javascript:__doPostBack('ctl00$mantenimiento_gamas','')">Gamas</a></li>
+                                        <li><a id="mantenimiento_ubicacionInsumos" href="javascript:__doPostBack('ctl00$mantenimiento_ubicacionInsumos','')">Ubicación de Insumos</a></li>
+                                        <li><a id="mantenimiento_marcas" href="javascript:__doPostBack('ctl00$mantenimiento_marcas','')">Marcas</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_estados_contratos" href="javascript:__doPostBack('ctl00$mantenimiento_estados_contratos','')">Estados de Contratos</a></li>
+                                        <li><a id="mantenimiento_planes_contratos" href="javascript:__doPostBack('ctl00$mantenimiento_planes_contratos','')">Planes</a></li>
+                                        <li><a id="mantenimiento_zonas" href="javascript:__doPostBack('ctl00$mantenimiento_zonas','')">Zonas</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_caracteristicas_OrdenServico" href="javascript:__doPostBack('ctl00$mantenimiento_caracteristicas_OrdenServico','')">Características</a></li>
+                                        <li><a id="mantenimiento_trabajos_OrdenServico" href="javascript:__doPostBack('ctl00$mantenimiento_trabajos_OrdenServico','')">Trabajos</a></li>
+                                        <li><a id="mantenimiento_resultadoscaracteristicas_OrdenServico" href="javascript:__doPostBack('ctl00$mantenimiento_resultadoscaracteristicas_OrdenServico','')">Resultados de Características</a></li>
+                                        <li><a id="mantenimiento_resultadostrabajos_OrdenServico" href="javascript:__doPostBack('ctl00$mantenimiento_resultadostrabajos_OrdenServico','')">Resultados
+                                        de Trabajos</a></li>
+                                        <li><a id="mantenimiento_estados_OrdenServicio" href="javascript:__doPostBack('ctl00$mantenimiento_estados_OrdenServicio','')">Estados de Orden
+                                        de Servicio</a></li>
+                                        <li><a id="mantenimiento_etapas_OrdenServicio" href="javascript:__doPostBack('ctl00$mantenimiento_etapas_OrdenServicio','')">Etapas de Orden
+                                        de Servicio</a></li>
+                                        <li><a id="mantenimiento_tipos_OrdenServicio" href="javascript:__doPostBack('ctl00$mantenimiento_tipos_OrdenServicio','')">Tipos de Orden
+                                        de Servicio</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="mantenimiento_consultas" href="javascript:__doPostBack('ctl00$mantenimiento_consultas','')">Reportes Dinámicos</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="controlembarques_paises" href="javascript:__doPostBack('ctl00$controlembarques_paises','')">Países</a></li>
+                                        <li><a id="controlembarques_puertos" href="javascript:__doPostBack('ctl00$controlembarques_puertos','')">Puertos</a></li>
+                                        <li><a id="controlembarques_almacenes" href="javascript:__doPostBack('ctl00$controlembarques_almacenes','')">Almacenes</a></li>
+                                        <li><a id="controlembarques_tipoembalaje" href="javascript:__doPostBack('ctl00$controlembarques_tipoembalaje','')">Tipo de Embalaje</a></li>
+                                        <li><a id="controlembarques_Modalidades" href="javascript:__doPostBack('ctl00$controlembarques_Modalidades','')">Modalidades</a></li>
+                                        <li><a id="controlembarques_Fletes" href="javascript:__doPostBack('ctl00$controlembarques_Fletes','')">Fletes</a></li>
+                                        <li><a id="controlembarques_TiposDeBL" href="javascript:__doPostBack('ctl00$controlembarques_TiposDeBL','')">Tipos de BL</a></li>
+                                        <li><a id="controlembarques_Aduanas" href="javascript:__doPostBack('ctl00$controlembarques_Aduanas','')">Aduanas</a></li>
+                                        <li><a id="controlembarques_AgentesCarga" href="javascript:__doPostBack('ctl00$controlembarques_AgentesCarga','')">Agentes de Carga</a></li>
+                                        <li><a id="controlembarques_Shipper" href="javascript:__doPostBack('ctl00$controlembarques_Shipper','')">Shipper</a></li>
+                                        <li><a id="controlembarques_Incoterm" href="javascript:__doPostBack('ctl00$controlembarques_Incoterm','')">Incoterm</a></li>
+                                        <li><a id="controlembarques_Frecuencia" href="javascript:__doPostBack('ctl00$controlembarques_Frecuencia','')">Frecuencia</a></li>
+                                        <li><a id="controlembarques_MotivoDeVariacionCosto" href="javascript:__doPostBack('ctl00$controlembarques_MotivoDeVariacionCosto','')">Motivo de
+                                        Variación de Costo</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="vehiculos_marcas" href="javascript:__doPostBack('ctl00$vehiculos_marcas','')">Marcas</a></li>
+                                        <li><a id="vehiculos_tiposvehiculos" href="javascript:__doPostBack('ctl00$vehiculos_tiposvehiculos','')">Tipos de Vehículos</a></li>
+                                        <li><a id="vehiculos_colores" href="javascript:__doPostBack('ctl00$vehiculos_colores','')">Colores</a></li>
+                                        <li><a id="vehiculos_estilos" href="javascript:__doPostBack('ctl00$vehiculos_estilos','')">Estilos</a></li>
+                                        <li><a id="vehiculos_combustibles" href="javascript:__doPostBack('ctl00$vehiculos_combustibles','')">Combustibles</a></li>
+                                        <li><a id="vehiculos_transmisiones" href="javascript:__doPostBack('ctl00$vehiculos_transmisiones','')">Transmisiones</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="controlcaso_Estados" href="javascript:__doPostBack('ctl00$controlcaso_Estados','')">Estados</a></li>
+                                        <li><a id="controlcaso_Aseguradoras" href="javascript:__doPostBack('ctl00$controlcaso_Aseguradoras','')">Aseguradoras</a></li>
+                                        <li><a id="controlcaso_Asesores" href="javascript:__doPostBack('ctl00$controlcaso_Asesores','')">Asesores</a></li>
+                                        <li><a id="controlcaso_Peritos" href="javascript:__doPostBack('ctl00$controlcaso_Peritos','')">Peritos</a></li>
+                                        <li><a id="controlcaso_EstadosReparacion" href="javascript:__doPostBack('ctl00$controlcaso_EstadosReparacion','')">Estados de Reparación</a></li>
+                                        <li><a id="controlcaso_AsesoresViales" href="javascript:__doPostBack('ctl00$controlcaso_AsesoresViales','')">Asesores Viales</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="ddl_plantillasSistema">Plantillas
+                                del Sistema<i class="icon-chevron-right sub-menu-caret"> </i></a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a href="PlantillaRecordatorioCita.aspx" id="mantenimiento_plantilla_RecordatorioCita">Recordatorio de Cita General</a></li>
+                                        <li><a href="PlantillaRecordatorioCitaCompania.aspx" id="mantenimiento_plantilla_RecordatorioCitaCompania">Recordatorio de Cita por Compañía</a></li>
+                                        <li><a href="PlantillaSeguimientoCita.aspx" id="mantenimiento_Seguimiento_Dia_Despues">Seguimiento Día después</a></li>
+                                        <li><a href="PlantillaCumpleanos.aspx" id="mantenimiento_plantilla_cumpleanos">Cumpleaños</a></li>
+                                        <li></li>
+                                        <li></li>
+
+                                        
+                                        
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                       
+                                      
+
+                                        
+
+                                    </ul>
+                                </li>                                
+                                <li><a href="importadorinventario.aspx" id="cargadorimagenesinsumos">Cargador de Imágenes de Insumos</a></li>
+                            </ul>                            
+                        </li>
+                        <li class="dropdown"><a id="mantenimiento_clientes" class="dropdown-toggle" data-toggle="dropdown" href="javascript:__doPostBack('ctl00$mantenimiento_clientes','')">Pacientes</a>
+                            <ul class="dropdown-menu">
+                                <li><a id="Clientes" href="javascript:__doPostBack('ctl00$Clientes','')">Pacientes</a></li>
+                                <li></li>
+                                <li><a id="FichaClinica" href="javascript:__doPostBack('ctl00$FichaClinica','')">Ficha Clínica</a></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li><a id="Seguimiento_Cliente" href="javascript:__doPostBack('ctl00$Seguimiento_Cliente','')">Seguimiento</a></li>
+                                <li></li>
+                                <li><a id="padronelectoral" href="javascript:__doPostBack('ctl00$padronelectoral','')">Padrón electoral</a></li>
+                                <li><a id="padronhacienda" href="javascript:__doPostBack('ctl00$padronhacienda','')">Consulta de identificación en Hacienda</a></li>
+                                <li><a id="mantenimiento_tipos_pacientes" href="javascript:__doPostBack('ctl00$mantenimiento_tipos_pacientes','')">Tipos de Pacientes</a></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li><a id="correos_masivoss" href="javascript:__doPostBack('ctl00$correos_masivoss','')">Correos Masivos</a></li>
+                                <li></li>
+                                <li></li>
+                                <li> </li>
+                                <li>
+                                </li><li> </li>
+                                <li>
+                                </li>
+                                <li><a id="unificar_pacientes2" href="javascript:__doPostBack('ctl00$unificar_pacientes2','')">Unificar Pacientes</a></li>
+                                <li></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown"><a id="transacciones" class="dropdown-toggle" data-toggle="dropdown">Transacciones</a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown"><a href="#" id="facturacion">Facturación &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="Factura" href="javascript:__doPostBack('ctl00$Factura','')">Factura</a></li>
+                                        <li><a id="Recibo" href="javascript:__doPostBack('ctl00$Recibo','')">Recibo</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="ReciboAdelanto" href="javascript:__doPostBack('ctl00$ReciboAdelanto','')">Recibo de Adelanto</a></li>
+                                        <li><a id="NotaCredito" href="javascript:__doPostBack('ctl00$NotaCredito','')">Nota de Crédito</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="por_cobrar" href="javascript:__doPostBack('ctl00$por_cobrar','')">Por Cobrar</a></li>
+                                        <li><a id="Presupuesto" href="javascript:__doPostBack('ctl00$Presupuesto','')">Proforma</a></li>
+                                        <li></li>
+                                        <li><a id="aperturacaja" href="javascript:__doPostBack('ctl00$aperturacaja','')">Apertura de Caja</a></li>
+                                        <li><a id="valescaja" href="javascript:__doPostBack('ctl00$valescaja','')">Vales de Caja</a></li>
+                                        <li><a id="cierrecaja" href="javascript:__doPostBack('ctl00$cierrecaja','')">Cierre de Caja</a></li>
+                                        <li><a id="aplicareciboadelanto" href="javascript:__doPostBack('ctl00$aplicareciboadelanto','')">Aplicar Recibo Adelanto</a></li>
+                                        <li><a id="aplicanotacredito" href="javascript:__doPostBack('ctl00$aplicanotacredito','')">Aplicar Nota Crédito</a></li>
+                                        <li><a id="Reversareciboadelanto" href="javascript:__doPostBack('ctl00$Reversareciboadelanto','')">Reversar Aplicación Recibo Adelanto</a></li>
+                                        <li><a id="Reversanotacredito" href="javascript:__doPostBack('ctl00$Reversanotacredito','')">Reversar Aplicación Nota Crédito</a></li>
+                                        <li></li>
+                                        <li><a id="estadodocumentoselectronicos" href="javascript:__doPostBack('ctl00$estadodocumentoselectronicos','')">Estado de Documentos
+                                        Electrónicos</a></li>
+                                        <li><a id="facturaelectronicacompra" href="javascript:__doPostBack('ctl00$facturaelectronicacompra','')">Factura Electrónica de Compra</a></li>
+                                        <li><a id="recepciondetallada" href="javascript:__doPostBack('ctl00$recepciondetallada','')">Recepción Documentos Electrónicos Detallada</a></li>
+                                        <li><a id="recepciondocumentoselectronicos" href="javascript:__doPostBack('ctl00$recepciondocumentoselectronicos','')">Recepción Documentos Electrónicos</a></li>
+                                        <li><a id="recepciondocumentoselectronicosparcial" href="javascript:__doPostBack('ctl00$recepciondocumentoselectronicosparcial','')">Recepción Documentos Electrónicos (Aceptación Parcial)</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="recepcionautomatica" href="javascript:__doPostBack('ctl00$recepcionautomatica','')">Dashboard Recepción Documentos Electrónicos</a></li>
+                                        <li><a id="descargadocumentoselectronicos" href="javascript:__doPostBack('ctl00$descargadocumentoselectronicos','')">Descarga de Documentos Electrónicos</a></li>
+                                        <li><a id="descargaPDFtransacciones" href="javascript:__doPostBack('ctl00$descargaPDFtransacciones','')">Descarga de PDF de Transacciones</a></li>
+                                        <li><a id="descargadocumentoselectronicosrecepcionados" href="javascript:__doPostBack('ctl00$descargadocumentoselectronicosrecepcionados','')">Descarga de Documentos Electrónicos Recepcionados</a></li>
+                                        <li><a href="bitacora_enviocomprobantesFE.aspx" id="bitacora_enviodocumentoselectronicos">Bitácora de Envío de Documentos Electrónicos</a></li>
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="facturacionegreso">Egresos &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="Proveedores" href="javascript:__doPostBack('ctl00$Proveedores','')">Proveedores</a></li>
+                                        <li><a id="CondicionCredito" href="javascript:__doPostBack('ctl00$CondicionCredito','')">Condiciones de Crédito</a></li>
+                                        <li><a id="FacturaEgreso" href="javascript:__doPostBack('ctl00$FacturaEgreso','')">Factura de Egreso</a></li>
+                                        <li><a id="ReciboEgreso" href="javascript:__doPostBack('ctl00$ReciboEgreso','')">Recibo de Egreso</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown"><a href="#" id="Inventarios">Inventarios &gt;</a>
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="Proveedores2" href="javascript:__doPostBack('ctl00$Proveedores2','')">Proveedores</a></li>
+                                        <li><a id="mantenimiento_insumos" href="javascript:__doPostBack('ctl00$mantenimiento_insumos','')">Insumos</a></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li><a id="ordenes_pedido" href="javascript:__doPostBack('ctl00$ordenes_pedido','')">Ordenes de Pedido</a></li>
+                                        <li><a id="unificar_orden_pedido" href="javascript:__doPostBack('ctl00$unificar_orden_pedido','')">Unificar Ordenes de Pedido</a></li>
+                                        <li><a id="movimientos_inventario" href="javascript:__doPostBack('ctl00$movimientos_inventario','')">Movimientos de Inventario</a></li>
+                                        <li><a id="movimientos_inventario_detallado" href="javascript:__doPostBack('ctl00$movimientos_inventario_detallado','')">Movimientos de Inventario (Detallado)</a></li>
+                                        <li><a id="movimientos_inventario_traslado" href="javascript:__doPostBack('ctl00$movimientos_inventario_traslado','')">Traslado de Inventario</a></li>                                        
+                                        <li></li>
+                                        <li><a id="ECO_documentosrecepcionados" href="javascript:__doPostBack('ctl00$ECO_documentosrecepcionados','')">Registrar Entrada de Documento Electrónico Recepcionado</a></li>                                        
+                                        <li><a id="tomafisicainventario" href="javascript:__doPostBack('ctl00$tomafisicainventario','')">Toma Física de inventario</a></li>
+                                        <li><a id="historialtomafisicainventario" href="javascript:__doPostBack('ctl00$historialtomafisicainventario','')">Historial de Toma Física de Inventario</a></li>
+                                        <li><a id="movimientos_intenvario_kardex" href="javascript:__doPostBack('ctl00$movimientos_intenvario_kardex','')">Movimientos de Inventario (Kardex)</a></li>
+                                        <li><a id="historico_insumos" href="javascript:__doPostBack('ctl00$historico_insumos','')">Histórico de Insumos</a></li>
+                                        <li></li>
+                                        <li></li>                                        
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">                                        
+                                        <li><a href="registrarlote.aspx" id="registrolotes">Registro de Lotes</a></li>
+                                        <li><a href="lotesactivos.aspx" id="lotesactivos">Lotes Activos</a></li>
+                                        <li></li>
+                                        <li><a href="cambiarfechalote.aspx" id="CambiarFechaLote">Cambiar Fecha de Expiración de Lote</a></li>
+                                    </ul>
+                                </li>
+                                <li></li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="pedidosecommerce" href="javascript:__doPostBack('ctl00$pedidosecommerce','')">Pedidos de E-Commerce</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <ul class="dropdown-menu sub-menu">
+                                        <li><a id="tipoliquidacion" href="javascript:__doPostBack('ctl00$tipoliquidacion','')">Tipos de Liquidación</a></li>
+                                        <li><a id="LiquidacionPagosTerceros" href="javascript:__doPostBack('ctl00$LiquidacionPagosTerceros','')">Liquidación de Pagos a Terceros</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown"><a id="agenda" class="dropdown-toggle" data-toggle="dropdown" href="javascript:__doPostBack('ctl00$agenda','')">Agenda</a>
+                            <ul class="dropdown-menu">
+                                <li><a id="citas" href="javascript:__doPostBack('ctl00$citas','')">Agenda</a></li>
+                                <li><a href="reagendacion.aspx" id="citasreagendacion">Citas por Reagendar</a></li>
+                                <li><a id="actividades_recordatorios" href="javascript:__doPostBack('ctl00$actividades_recordatorios','')">Actividades y Recordatorios</a></li>
+                                <li><a href="consultacitaseliminadas.aspx" id="consultacitaseliminadas">Citas Eliminadas</a></li>
+                                <li><a href="consultacalificacioncitas.aspx" id="calificacioncitas">Citas Calificadas</a></li>
+                                <li><a href="consultacalificacioncitasPorCuestionario.aspx" id="calificacioncitasporcuestionario">Citas Calificadas por Cuestionario</a></li>
+                                <li><a href="citasfuncionarios.aspx" id="agendafuncionarios">Disponibilidad de Doctores</a></li>
+                                <li><a id="mantenimiento_agendatelefonica" href="javascript:__doPostBack('ctl00$mantenimiento_agendatelefonica','')">Agenda Telefónica</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown"><a id="menureportes" class="dropdown-toggle" data-toggle="dropdown">Reportes</a>
+                            <ul class="dropdown-menu">
+                                <li><a id="reportesespecializados" href="javascript:__doPostBack('ctl00$reportesespecializados','')">Reportes Dinámicos</a></li>
+                                <li><a id="reportesgenerales" href="javascript:__doPostBack('ctl00$reportesgenerales','')">Reportes Generales</a></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                            </ul>
+                        </li>
+                        <li></li>
+                        <li><a id="solicitarsoporte" href="javascript:__doPostBack('ctl00$solicitarsoporte','')">Solicitar Soporte</a>
+                        </li><li>
+                        </li>
+                        <li>
+                        </li>
+                        <li class="dropdown"><a id="acercade" class="dropdown-toggle" data-toggle="dropdown">Acerca de</a>
+                            <ul class="dropdown-menu">
+                                li&gt;<a href="https://youtu.be/DThxWGEXE8M?si=EG8petippXGhI_0c" id="A1" target="blank">Integración de E-commerce</a>
+                        
+                        <li><a href="https://www.youtube.com/watch?v=3V7uQHfosUs&amp;list=PLX2lLW-fyIns_g2slxsGKCHB5j43Pe4CN" id="videos_sistema" target="blank">Videos del Sistema</a></li>
+                    </ul>
+                    </li>
+                        <li>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.nav-collapse -->
+            </div>
+            <!-- /.container -->
+        </div>
+        <!-- /#nav -->
+        <div id="content">
+            <div class="container">
+                <div id="page-title" class="clearfix">
+                    <ul class="breadcrumb">
+                        
+    <li id="ContentPlaceHolder1_Titulo_Mantenimiento" class="active">Estado de Cuenta del sistema</li>
+    &nbsp;&nbsp;<li>&nbsp;</li>
+    <li>&nbsp;</li>
+
+                    </ul>
+                </div>
+                <!-- /.page-title -->
+                <div class="row">
+                    
+  
+        <contenttemplate>
+            <div id="MainContent_Panel">
+	
+                <img id="MainContent_ImageSemaforo" src="img/semaforo.png" style="height:65px;width:75px;">
+&nbsp;
+                <span id="MainContent_lbl_tituloSemaforo" style="color:#CC0000;font-size:Medium;font-weight:bold;">Cuenta con 3 días para subir el comprobante del pago &gt;&gt;&gt;&gt;</span>
+                <input type="image" name="ctl00$MainContent$img_btn_inicio" id="MainContent_img_btn_inicio" title="Inicio" class="my_btn2" src="img/home.png" style="">
+                <span id="MainContent_lbl_IraInicio" style="font-weight:bold;">Ir a Inicio</span>
+                <br>
+                <br>
+                
+                &nbsp;&nbsp;
+                
+                <br>
+                <br>
+                <span id="MainContent_lbl_titulo" style="font-size:Medium;font-weight:bold;">A continuación, se presentan las facturas pendientes de pago correspondientes al uso del sistema</span>
+                &nbsp;<br>
+                <br>
+                <div>
+		<table class="grid" cellspacing="0" rules="all" border="1" id="MainContent_grid_datos" style="width:1170px;border-collapse:collapse;">
+			<tbody><tr>
+				<th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$compania')">Cod. Compañía</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$codigo')">No. Factura</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$fecha')">Fecha</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$diasfactura')">Días Factura</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$montototal')">Monto</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$moneda')">Moneda</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$saldo')">Saldo</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$saldocolones')">Saldo Colones</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$nombrefactura')">Nombre Factura</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$identificacionfactura')">Identificación Factura</a></th><th scope="col"><a href="javascript:__doPostBack('ctl00$MainContent$grid_datos','Sort$codigo')">Seleccionar</a></th>
+			</tr><tr>
+				<td>16</td><td>9656</td><td>01/11/2025</td><td>2</td><td>22.60</td><td>U.S. Dollars</td><td>22.60</td><td>11,406.90</td><td>ORTOMEDICA  MYT </td><td>3-101-726988 </td><td>
+                                <input id="MainContent_grid_datos_chk_seleccionado_0" type="checkbox" name="ctl00$MainContent$grid_datos$ctl02$chk_seleccionado" checked="checked" style="">
+                            </td>
+			</tr>
+		</tbody></table>
+	</div>
+                <br>
+                <br>
+                
+                <br>
+                <br>
+                <div id="MainContent_FileUpload">
+		<input type="hidden" name="ctl00$MainContent$FileUpload$ctl00" id="MainContent_FileUpload_ctl00" style=""><div id="MainContent_FileUpload_ctl01"><input name="ctl00$MainContent$FileUpload$ctl02" type="file" id="ctl00_MainContent_FileUpload_ctl02" style="width: 220px;"></div>
+	</div>
+                <br>
+                <br>
+                <input type="button" name="ctl00$MainContent$btn_guardar" value="Subir comprobante de pago" onclick="this.disabled='true';this.value='En Proceso...';__doPostBack('ctl00$MainContent$btn_guardar','')" id="MainContent_btn_guardar" class="btnfr" style="">
+                <br>
+                <span id="MainContent_lbl_mensaje" style="color:#CC0000;font-size:Medium;"></span>
+                <br>
+                <br>
+                <br>
+            
+</div>
+            </contenttemplate></div>
+        
+  
+
+                </div>
+                <!-- /row -->
+            </div>
+            <!-- /.container -->
+        
+        <!-- /#content -->
+        <div id="footer">
+            <div class="container" style="font-weight: bold; color: #003399">
+            </div>
+            <!-- /.container -->
+        </div>
+        <!-- /#footer -->
+    
+
+<script src="/ScriptResource.axd?d=X00unctvaWKq0yZ3291BuTFKDv5clbJYRyEce5AGMnOg91t17coCcwoi2BwQNiKNHWiAHbHLUirarw5EF4RT06idAz4Cs5BBzF_9jFq5nvyMSXkXrgU4PozqEAxRnIBL0&amp;t=7c776dc1" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=ExiFj5OWxyPhvuetJm20iwkM3Y7IZEQvFfXSszf_O7NidxvEJGxDNQB6npjVFHneuKjMAJGGccOhfDXvFEXOAhg4mTLzulf8rLRE6APrsPJMAdGwPfojjFHjx2YcPDpVfq_FhSBZBpA9BruC9YnaCQ2&amp;t=7c776dc1" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=1EaHd7LhdiSchA2j7Hq7xV5VYAxZcykYb-1ndxZNHMUoZ6iFYj55zM7E2-HioAgBNwTww-QFIm45PsNHPQzbjh0FHjDPhRpjOBC7cZy8EUxQGjs3bo_e0z5mhpKgybDwQdMqHdDQETp84j9hLH9BLQ2&amp;t=7c776dc1" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+
+theForm.oldSubmit = theForm.submit;
+theForm.submit = WebForm_SaveScrollPositionSubmit;
+
+theForm.oldOnSubmit = theForm.onsubmit;
+theForm.onsubmit = WebForm_SaveScrollPositionOnSubmit;
+Sys.Application.add_init(function() {
+    $create(Sys.Extended.UI.AsyncFileUpload, {"clientStateField":$get("MainContent_FileUpload_ClientState"),"completeBackColor":"Lime","errorBackColor":"Red","formName":"form1","hiddenField":$get("MainContent_FileUpload_ctl00"),"inputFile":$get("ctl00_MainContent_FileUpload_ctl02"),"postBackUrl":"/estadocuentanebbia.aspx","uploadingBackColor":"White"}, null, null, $get("MainContent_FileUpload"));
+});
+//]]>
+</script>
+</form>
+    
+
+
+
+
+</body></html>

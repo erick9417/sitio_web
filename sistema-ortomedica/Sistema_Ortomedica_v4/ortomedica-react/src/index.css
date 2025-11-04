@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50;
+}
+
+main.cat{ max-width:1024px; margin:0 auto; padding:18px; }
+.cat__controls{ display:flex; align-items:center; justify-content:space-between; margin:10px 2px 6px }
+.cat__controls select{ padding:6px 8px; border-radius:8px; border:1px solid #e5e7eb; }
+.cat__pager{ display:flex; gap:10px }
+.cat__pager button{
+  background:#f4f6ff; color:#0b47a1; border:none; border-radius:8px; padding:8px 12px; font-weight:600; cursor:pointer;
+}
+.cat__pager button:disabled{ opacity:.5; cursor:not-allowed }
+.cat__hint{ padding:8px 4px; color:#6b7280 }

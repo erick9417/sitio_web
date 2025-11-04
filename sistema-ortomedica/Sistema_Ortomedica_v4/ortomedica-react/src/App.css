@@ -1,0 +1,52 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+main.cat{ max-width:1024px; margin:0 auto; padding:18px; }
+.cat__controls{ display:flex; align-items:center; justify-content:space-between; margin:10px 2px 6px }
+.cat__controls select{ padding:6px 8px; border-radius:8px; border:1px solid #e5e7eb; }
+.cat__pager{ display:flex; gap:10px }
+.cat__pager button{
+  background:#f4f6ff; color:#0b47a1; border:none; border-radius:8px; padding:8px 12px; font-weight:600; cursor:pointer;
+}
+.cat__pager button:disabled{ opacity:.5; cursor:not-allowed }
+.cat__hint{ padding:8px 4px; color:#6b7280 }

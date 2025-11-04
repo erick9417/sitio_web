@@ -1,0 +1,81 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { ProductsTable } from '@/components/ProductsTable'
+import { RefreshButton } from '@/components/RefreshButton'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
+import { getIngestStatus } from '@/lib/api'
+import '@/styles/Catalog.css'
+
+export default function ProductsPage() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(10)
+
+  const qc = useQueryClient()
+
+  // Poll ingest status and trigger refetch when done
+  const { data: ingestStatus } = useQuery<any>({
+    queryKey: ['ingest', 'status'],
+    queryFn: getIngestStatus,
+    refetchInterval: (data: any) => (data?.status === 'running' ? 3000 : false),
+  })
+
+  // Refetch products when ingest finishes
+  useEffect(() => {
+    if (ingestStatus && ingestStatus.status !== 'running') {
+      qc.invalidateQueries({ queryKey: ['products'] })
+    }
+  }, [ingestStatus, qc])
+
+  return (
+    <div className="catalog-shell">
+      <header className="topbar">
+        <div className="brand-wrap">
+          <img
+            src="/logo1.png"
+            alt="Ortomédica"
+            className="logo"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none'
+            }}
+          />
+        </div>
+
+        <form className="search" onSubmit={(e) => { e.preventDefault(); }}>
+          <input
+            placeholder="Buscar productos..."
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+          />
+          <button type="submit" className="icon-btn" aria-label="Buscar">
+            🔍
+          </button>
+        </form>
+
+        <div className="toolbar">
+          <RefreshButton 
+            onStarted={() => qc.invalidateQueries({ queryKey: ['ingest', 'status'] })}
+          />
+          <div className="ingest-status">
+            Estado:{' '}
+            <b>
+              {ingestStatus?.status === 'running'
+                ? 'actualizando...'
+                : ingestStatus?.status === 'failed'
+                ? 'error'
+                : 'listo'}
+            </b>
+          </div>
+        </div>
+      </header>
+
+      <ProductsTable
+        q={searchTerm}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={(p: number) => setPage(p)}
+      />
+    </div>
+  )
+}

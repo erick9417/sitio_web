@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+  Variables de marca. 
+  CAMBIA aquí los colores y afectará todo el sitio.
+  Azul:  #004AAD  → hsl(216,100%,33%)
+  Naranja: #F58634 → hsl(24,90%,59%)
+*/
+:root {
+  --brand-primary: 216 100% 33%;
+  --brand-accent: 24 90% 59%;
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+}
+
+html, body {
+  height: 100%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Utilidades extra */
+.card {
+  @apply bg-white rounded-2xl shadow-soft border;
+}

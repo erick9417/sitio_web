@@ -1,0 +1,39 @@
+# Node
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-error.log
+pnpm-debug.log*
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.venv/
+venv/
+env/
+
+# Playwright
+playwright/.cache/
+
+# Env files (do NOT commit secrets)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Build artifacts
+build/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Logs
+logs/
+*.log

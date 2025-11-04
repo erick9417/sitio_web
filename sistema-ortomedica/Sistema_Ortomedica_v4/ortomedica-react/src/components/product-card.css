@@ -1,0 +1,22 @@
+.pc{ background:#fff; border:1px solid #e8e8ee; border-radius:12px; padding:16px; margin:16px 0; box-shadow:0 2px 4px rgba(0,0,0,.04) }
+.pc__head{ display:flex; align-items:center; gap:16px; cursor:pointer; }
+.pc__img{ width:84px; height:84px; object-fit:contain; background:#f6f7fb; border-radius:10px; border:1px solid #f0f0f6; }
+.pc__meta{ flex:1; min-width:0 }
+.pc__title-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+.pc__title{ margin:0; font-size:20px; font-weight:700; color:#1f2937 }
+.pc__sku{ font-size:12px; color:#6b7280; background:#f3f4f6; padding:3px 8px; border-radius:999px }
+.pc__brand{ font-size:13px; color:#6b7280; margin-top:2px }
+.pc__desc{ margin:6px 0 0; color:#4b5563; font-size:14px }
+.pc__toggle{ background:#f4f6ff; color:#0b47a1; border:none; padding:8px 12px; border-radius:8px; font-weight:600; }
+.pc__toggle:hover{ filter:brightness(1.05) }
+.pc__body{ margin-top:14px }
+.pc__tbl{ width:100%; border-collapse:collapse }
+.pc__tbl thead th{
+  text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.02em; color:#6b7280; padding:6px 10px;
+  border-bottom:1px solid #eef1f7;
+}
+.pc__tbl tbody td{ padding:10px; border-bottom:1px dashed #f0f2f7; }
+.pc__prod-name{ color:#334155 }
+.pc__price{ color:#e06a00 }
+.pc__inv{ font-weight:700; color:#111827 }
+.pc__date--ok{ color:#b91c1c; font-weight:600 }
