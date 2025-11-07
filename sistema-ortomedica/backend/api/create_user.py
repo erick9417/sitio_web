@@ -21,28 +21,33 @@ def db():
         database=os.getenv("DB_NAME", "inventarios"),
     )
 
-email = "epadilla@ortomedicacr.com"
-name = "EPN"
-role = "admin"
-password = "@dmin123"  # cámbiala
+def create_user_direct(email, password, role="user"):
+    """Crea un usuario directamente en la base de datos"""
+    try:
+        con = db(); cur = con.cursor()
+        cur.execute(
+            "INSERT INTO users (email,password_hash,role) VALUES (%s,%s,%s)",
+            (email, PWD.hash(password), role),
+        )
+        con.commit()
+        print(f"✅ Usuario creado: {email} (rol: {role})")
+        return True
+    except mysql.connector.Error as e:
+        print("Error de MySQL:", e)
+        return False
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
+        try:
+            con.close()
+        except Exception:
+            pass
 
-try:
-    con = db(); cur = con.cursor()
-    cur.execute(
-        "INSERT INTO users (email,password_hash,name,role) VALUES (%s,%s,%s,%s)",
-        (email, PWD.hash(password), name, role),
-    )
-    con.commit()
-    print("Usuario creado:", email)
-except mysql.connector.Error as e:
-    print("Error de MySQL:", e)
-    raise
-finally:
-    try:
-        cur.close()
-    except Exception:
-        pass
-    try:
-        con.close()
-    except Exception:
-        pass
+# Script por defecto si se ejecuta directamente
+if __name__ == "__main__":
+    email = "epadilla@ortomedicacr.com"
+    role = "admin"
+    password = "@dmin123"  # cámbiala
+    create_user_direct(email, password, role)
