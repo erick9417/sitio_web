@@ -31,16 +31,15 @@ try:
     
     # Intentar obtener usuarios
     try:
-        cursor.execute("SELECT email, name, role, created_at FROM users ORDER BY created_at DESC")
+        cursor.execute("SELECT email, role, created_at FROM users ORDER BY created_at DESC")
         users = cursor.fetchall()
         
         if users:
             print("=== USUARIOS REGISTRADOS ===\n")
             for user in users:
                 print(f"Email: {user[0]}")
-                print(f"Nombre: {user[1]}")
-                print(f"Rol: {user[2]}")
-                print(f"Creado: {user[3]}")
+                print(f"Rol: {user[1]}")
+                print(f"Creado: {user[2]}")
                 print("-" * 50)
             print(f"\nTotal de usuarios: {len(users)}")
         else:

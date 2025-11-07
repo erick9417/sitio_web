@@ -149,7 +149,7 @@ def upsert_inventory_current(row: dict):
     cur.close(); con.close()
 
 # ------------- OPTIMIZACIONES BULK (menos conexiones) -------------
-def bulk_insert_inventory_raw(rows: list[dict]):
+def bulk_insert_inventory_raw(rows):
         """
         Inserta muchas filas en inventory_raw en una sola conexión.
 
@@ -173,7 +173,7 @@ def bulk_insert_inventory_raw(rows: list[dict]):
         cur.close(); con.close()
         return n
 
-def bulk_upsert_inventory_current(rows: list[dict]):
+def bulk_upsert_inventory_current(rows):
         """
         Upsert masivo en inventory_current usando una sola conexión.
 
