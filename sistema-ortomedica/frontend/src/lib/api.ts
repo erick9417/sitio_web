@@ -1,8 +1,11 @@
 import axios from 'axios'
 
 // Allow overriding the API base via env at build/runtime (Next.js exposes NEXT_PUBLIC_*)
-// Fallback to localhost for local development.
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001'
+// In production default to Next.js internal proxy path '/api' handled by next.config.js rewrites.
+// In development default to local FastAPI port 8001.
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8001')
 
 const api = axios.create({
   baseURL: API_BASE,
