@@ -1,9 +1,11 @@
 import axios from 'axios'
 
+// Allow overriding the API base via env at build/runtime (Next.js exposes NEXT_PUBLIC_*)
+// Fallback to localhost for local development.
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001'
+
 const api = axios.create({
-  // FastAPI runs on port 8000 and exposes routes like /products and /ingest/run
-  // Temporarily pointing to 8001 because 8000 is in use on this machine.
-  baseURL: 'http://localhost:8001',
+  baseURL: API_BASE,
 })
 
 export const getProducts = async (opts?: { page?: number; page_size?: number; q?: string }) => {
