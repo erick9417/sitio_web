@@ -4,6 +4,8 @@ from __future__ import annotations
 import os
 import datetime as dt
 from typing import Any, Dict, List, Optional
+from pathlib import Path
+from dotenv import load_dotenv
 
 import mysql.connector
 from mysql.connector import pooling
@@ -21,12 +23,17 @@ from datetime import datetime, timezone
 # CONFIG
 # =========================
 
+# Cargar variables de entorno desde backend/.env
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+ENV_PATH = BACKEND_ROOT / '.env'
+load_dotenv(dotenv_path=ENV_PATH, override=True)
+
 # Puedes moverlos a variables de entorno si quieres
 DB_CONFIG = {
     "host":     os.getenv("DB_HOST", "127.0.0.1"),
     "port":     int(os.getenv("DB_PORT", "3306")),
     "user":     os.getenv("DB_USER", "root"),
-    "password": os.getenv("DB_PASS", "$Ortome@17"),
+    "password": os.getenv("DB_PASS", ""),
     "database": os.getenv("DB_NAME", "inventarios"),
     "charset":  "utf8mb4",
     "use_pure": True,
@@ -47,9 +54,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+# CORS básico para desarrollo
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -131,11 +139,19 @@ def fetch_user_by_email(email: str) -> Optional[Dict[str, Any]]:
     conn = get_conn()
     try:
         cur = conn.cursor(dictionary=True)
+        # La tabla users en producción no tiene columna 'name'
         cur.execute(
-            "SELECT email, name, role, password_hash FROM users WHERE email=%s LIMIT 1",
+            "SELECT email, role, password_hash FROM users WHERE email=%s LIMIT 1",
             (email,),
         )
         row = cur.fetchone()
+        # Normalizar para que las claves esperadas existan
+        if row:
+            if isinstance(row, dict):
+                row.setdefault("name", "")
+            else:
+                # Si no es dict (por seguridad), envolver
+                row = {"email": row[0], "role": row[1], "password_hash": row[2], "name": ""}
         return row
     finally:
         try:
