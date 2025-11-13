@@ -15,15 +15,16 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies (workspace)
-        run: npm ci
+      - name: Install frontend dependencies
+        run: |
+          npm --prefix frontend install
 
       - name: Build frontend
         env:
           RAYON_NUM_THREADS: '1'
           NEXT_DISABLE_SWC_NATIVE: '1'
           SWC_MINIFY: 'false'
-        run: npm run build
+        run: npm --prefix frontend run build
 
       - name: Upload Next build artifact
         uses: actions/upload-artifact@v4
