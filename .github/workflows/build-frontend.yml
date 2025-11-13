@@ -6,6 +6,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RAYON_NUM_THREADS: '1'
+      NEXT_DISABLE_SWC_NATIVE: '1'
+      SWC_MINIFY: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,16 +20,19 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Print environment info
+        run: |
+          node -v
+          npm -v
+          ls -la
+          ls -la sistema-ortomedica/frontend
+
       - name: Install frontend dependencies
         working-directory: sistema-ortomedica/frontend
         run: |
-          npm install
+          npm ci || npm install
 
       - name: Build frontend
-        env:
-          RAYON_NUM_THREADS: '1'
-          NEXT_DISABLE_SWC_NATIVE: '1'
-          SWC_MINIFY: 'false'
         working-directory: sistema-ortomedica/frontend
         run: npm run build
 
