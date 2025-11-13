@@ -16,20 +16,22 @@ jobs:
           node-version: '18'
 
       - name: Install frontend dependencies
+        working-directory: sistema-ortomedica/frontend
         run: |
-          npm --prefix frontend install
+          npm install
 
       - name: Build frontend
         env:
           RAYON_NUM_THREADS: '1'
           NEXT_DISABLE_SWC_NATIVE: '1'
           SWC_MINIFY: 'false'
-        run: npm --prefix frontend run build
+        working-directory: sistema-ortomedica/frontend
+        run: npm run build
 
       - name: Upload Next build artifact
         uses: actions/upload-artifact@v4
         with:
           name: next-build
-          path: frontend/.next
+          path: sistema-ortomedica/frontend/.next
           if-no-files-found: error
           retention-days: 7
