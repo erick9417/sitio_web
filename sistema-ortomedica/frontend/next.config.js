@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Build a minimal runtime bundle to simplify deployment on shared hosts
+  // This produces .next/standalone and .next/static for server-side start
+  output: 'standalone',
   // Speed up CI/builds on constrained hosts: skip ESLint and TS type checking during production builds
   // Note: This does NOT affect development; only the production build step.
   eslint: {

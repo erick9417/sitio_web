@@ -1,0 +1,55 @@
+name: Build Frontend Standalone
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'sistema-ortomedica/frontend/**'
+      - 'sistema-ortomedica/package.json'
+      - 'sistema-ortomedica/package-lock.json'
+      - '.github/workflows/build-frontend-standalone.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      # Force WASM SWC to avoid native Rust panics on constrained hosts
+      NEXT_DISABLE_SWC_NATIVE: '1'
+      SWC_MINIFY: 'false'
+      RAYON_NUM_THREADS: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: |
+            sistema-ortomedica/package-lock.json
+            sistema-ortomedica/frontend/package-lock.json
+
+      - name: Install dependencies (workspace root)
+        working-directory: sistema-ortomedica
+        run: |
+          npm ci || npm install
+
+      - name: Build frontend (standalone)
+        working-directory: sistema-ortomedica
+        run: |
+          npm run build
+          cd frontend
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/static
+          if [ -d public ]; then cp -r public .next/standalone/public; fi
+          tar czf frontend-standalone.tgz -C .next/standalone .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-standalone
+          path: sistema-ortomedica/frontend/frontend-standalone.tgz
+          if-no-files-found: error
