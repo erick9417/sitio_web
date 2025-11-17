@@ -1,5 +1,9 @@
 name: Sistema A Scraper (Playwright)
 
+concurrency:
+  group: scraper-sistema-a
+  cancel-in-progress: true
+
 on:
   schedule:
     # Ejecutar cada hora de lunes a viernes durante horario laboral (UTC)
@@ -11,6 +15,7 @@ on:
 jobs:
   scrape-and-upload:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
       - name: Checkout repository
@@ -22,23 +27,47 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install Python dependencies
+      - name: Install Python dependencies (pip)
         working-directory: sistema-ortomedica/backend
         run: |
-          pip install playwright python-dotenv openpyxl mysql-connector-python
-          playwright install --with-deps chromium
+          pip install python-dotenv openpyxl mysql-connector-python playwright
 
-      - name: Run Sistema A scraper
+      - name: Setup Playwright (Chromium + OS deps)
+        uses: microsoft/playwright-github-action@v1
+        with:
+          browsers: 'chromium'
+
+      - name: Open SSH tunnel and run scraper
         env:
           SISTEMA_A_USER: ${{ secrets.SISTEMA_A_USER }}
           SISTEMA_A_PASS: ${{ secrets.SISTEMA_A_PASS }}
           SISTEMA_A_BASE: https://sistema.grupoargus.co.cr
-          DB_HOST: ${{ secrets.DB_HOST }}
+          # DB creds (to remote MySQL on the server)
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASS: ${{ secrets.DB_PASS }}
           DB_NAME: ${{ secrets.DB_NAME }}
-          DB_PORT: ${{ secrets.DB_PORT }}
+          # SSH to server to tunnel 3307 -> 127.0.0.1:3306
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
         run: |
+          set -e
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$SERVER_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Start SSH tunnel (local 3307 -> remote 127.0.0.1:3306)
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -N -L 3307:127.0.0.1:3306 "${SERVER_USER}@${SERVER_HOST}" &
+          TUNNEL_PID=$!
+          sleep 2
+          
+          export DB_HOST=127.0.0.1
+          export DB_PORT=3307
           cd sistema-ortomedica/backend
           python -m scrapers.scraper_sistema_a_xls
+          
+          # Cleanup
+          kill $TUNNEL_PID || true
+          rm -f ~/.ssh/id_rsa
 
