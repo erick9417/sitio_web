@@ -1,3 +1,4 @@
+
 # db.py
 import os
 from datetime import datetime, timedelta
@@ -12,7 +13,8 @@ CFG = dict(
     user=os.getenv("DB_USER", "root"),
     password=os.getenv("DB_PASS", ""),
     database=os.getenv("DB_NAME", "inventarios"),
-    port=int(os.getenv("DB_PORT", "3306")),
+    # Tolerar secreto vacío: usa 3306 si DB_PORT está ausente o vacío
+    port=int(os.getenv("DB_PORT") or "3306"),
 )
 
 def _con():
