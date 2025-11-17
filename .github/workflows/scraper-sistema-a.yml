@@ -32,10 +32,9 @@ jobs:
         run: |
           pip install python-dotenv openpyxl mysql-connector-python playwright
 
-      - name: Setup Playwright (Chromium + OS deps)
-        uses: microsoft/playwright-github-action@v1
-        with:
-          browsers: 'chromium'
+      - name: Install Playwright browsers + system deps
+        run: |
+          python -m playwright install --with-deps chromium
 
       - name: Open SSH tunnel and run scraper
         env:
