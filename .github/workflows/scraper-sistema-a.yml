@@ -29,12 +29,12 @@ jobs:
           playwright install --with-deps chromium
 
       - name: Run Sistema A scraper
-        working-directory: sistema-ortomedica/backend
         env:
           SISTEMA_A_USER: ${{ secrets.SISTEMA_A_USER }}
           SISTEMA_A_PASS: ${{ secrets.SISTEMA_A_PASS }}
           SISTEMA_A_BASE: https://sistema.grupoargus.co.cr
         run: |
+          cd sistema-ortomedica/backend
           python scrapers/scraper_sistema_a_xls.py
 
       - name: Upload database artifact
