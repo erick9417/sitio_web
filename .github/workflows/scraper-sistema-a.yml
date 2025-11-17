@@ -30,7 +30,8 @@ jobs:
       - name: Install Python dependencies (pip)
         working-directory: sistema-ortomedica/backend
         run: |
-          pip install python-dotenv openpyxl mysql-connector-python playwright
+          pip install python-dotenv openpyxl mysql-connector-python playwright \
+                      xlrd==1.2.0 beautifulsoup4 lxml
 
       - name: Install Playwright browsers + system deps
         run: |
