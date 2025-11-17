@@ -35,7 +35,7 @@ jobs:
           SISTEMA_A_BASE: https://sistema.grupoargus.co.cr
         run: |
           cd sistema-ortomedica/backend
-          python scrapers/scraper_sistema_a_xls.py
+          python -m scrapers.scraper_sistema_a_xls
 
       - name: Upload database artifact
         uses: actions/upload-artifact@v4
