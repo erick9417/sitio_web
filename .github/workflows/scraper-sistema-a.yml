@@ -25,7 +25,7 @@ jobs:
       - name: Install Python dependencies
         working-directory: sistema-ortomedica/backend
         run: |
-          pip install playwright python-dotenv openpyxl
+          pip install playwright python-dotenv openpyxl mysql-connector-python
           playwright install --with-deps chromium
 
       - name: Run Sistema A scraper
@@ -33,48 +33,12 @@ jobs:
           SISTEMA_A_USER: ${{ secrets.SISTEMA_A_USER }}
           SISTEMA_A_PASS: ${{ secrets.SISTEMA_A_PASS }}
           SISTEMA_A_BASE: https://sistema.grupoargus.co.cr
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: ${{ secrets.DB_PORT }}
         run: |
           cd sistema-ortomedica/backend
           python -m scrapers.scraper_sistema_a_xls
 
-      - name: Upload database artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: inventario-db-${{ github.run_number }}
-          path: sistema-ortomedica/backend/inventario.db
-          retention-days: 1
-          if-no-files-found: error
-
-      - name: Install SSH client
-        run: sudo apt-get update && sudo apt-get install -y openssh-client
-
-      - name: Upload database to server via SCP
-        env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          SERVER_PATH: ${{ secrets.SERVER_PATH }}
-        run: |
-          # Crear directorio .ssh
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          
-          # Configurar SSH key
-          echo "$SERVER_SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # Agregar host a known_hosts
-          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          
-          # Subir base de datos
-          scp -o StrictHostKeyChecking=no \
-              sistema-ortomedica/backend/inventario.db \
-              "${SERVER_USER}@${SERVER_HOST}:${SERVER_PATH}/inventario.db.new"
-          
-          # Reemplazar base de datos en el servidor (atómico)
-          ssh -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" \
-              "mv ${SERVER_PATH}/inventario.db.new ${SERVER_PATH}/inventario.db"
-
-      - name: Cleanup SSH key
-        if: always()
-        run: rm -f ~/.ssh/id_rsa
