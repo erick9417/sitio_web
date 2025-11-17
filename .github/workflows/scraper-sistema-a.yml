@@ -1,0 +1,80 @@
+name: Sistema A Scraper (Playwright)
+
+on:
+  schedule:
+    # Ejecutar cada hora de lunes a viernes durante horario laboral (UTC)
+    # 13:00-22:00 UTC = 7:00am-4:00pm Costa Rica (UTC-6)
+    - cron: '0 13-22 * * 1-5'  # Cada hora de 7am a 4pm, lunes a viernes
+  
+  workflow_dispatch:  # Permitir ejecución manual desde GitHub UI
+
+jobs:
+  scrape-and-upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        working-directory: sistema-ortomedica/backend
+        run: |
+          pip install playwright python-dotenv openpyxl
+          playwright install --with-deps chromium
+
+      - name: Run Sistema A scraper
+        working-directory: sistema-ortomedica/backend
+        env:
+          SISTEMA_A_USER: ${{ secrets.SISTEMA_A_USER }}
+          SISTEMA_A_PASS: ${{ secrets.SISTEMA_A_PASS }}
+          SISTEMA_A_BASE: https://sistema.grupoargus.co.cr
+        run: |
+          python scrapers/scraper_sistema_a_xls.py
+
+      - name: Upload database artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: inventario-db-${{ github.run_number }}
+          path: sistema-ortomedica/backend/inventario.db
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Install SSH client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Upload database to server via SCP
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_PATH: ${{ secrets.SERVER_PATH }}
+        run: |
+          # Crear directorio .ssh
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Configurar SSH key
+          echo "$SERVER_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Agregar host a known_hosts
+          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          
+          # Subir base de datos
+          scp -o StrictHostKeyChecking=no \
+              sistema-ortomedica/backend/inventario.db \
+              "${SERVER_USER}@${SERVER_HOST}:${SERVER_PATH}/inventario.db.new"
+          
+          # Reemplazar base de datos en el servidor (atómico)
+          ssh -o StrictHostKeyChecking=no "${SERVER_USER}@${SERVER_HOST}" \
+              "mv ${SERVER_PATH}/inventario.db.new ${SERVER_PATH}/inventario.db"
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_rsa
